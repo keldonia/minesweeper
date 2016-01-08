@@ -7,6 +7,39 @@ class Board
     @board  = Array.new(size) {Array.new(size)}
     @bombs  = bombs
     board_populate
+    #board_state
+  end
+
+  def board_state
+
+  end
+
+  def bomb_adjacency(pos)
+    number_of_bombs_adjacent = 0
+    unless self[pos] == :B
+      bordering_tiles(pos).each do |tile|
+        number_of_bombs_adjacent += 1 if self[tile] == :B
+      end
+    end
+
+    number_of_bombs_adjacent
+  end
+
+  def bordering_tiles(pos)
+    possible_border_tiles(pos).select do |pos|
+      (0...@size).include?(pos[0]) && (0...@size).include?(pos[1])
+    end
+  end
+
+  def possible_border_tiles(pos)
+    potential_bordering_tiles = []
+    (-1..1).to_a.each do |x|
+      (-1..1).to_a.each do |y|
+        potential_tile = [pos[0] + x, pos[1] + y]
+        potential_bordering_tiles << potential_tile unless potential_tile == pos
+      end
+    end
+    potential_bordering_tiles
   end
 
   private
@@ -15,9 +48,8 @@ class Board
     until bombs_placed == @bombs
       #debugger
       random_position = [rand(@size), rand(@size)]
-      p random_position
       if self[random_position].nil?
-        self[random_position] = "B"
+        self[random_position] = :B
       else
         redo
       end
@@ -33,9 +65,5 @@ class Board
   def []=(pos, value)
     x, y = pos
     @board[x][y] = value
-  end
-
-  def empty?(pos)
-    self[pos].nil?
   end
 end
