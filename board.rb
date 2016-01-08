@@ -1,33 +1,68 @@
 class Board
+  require 'tile.rb'
+
   attr_reader :board
   require 'byebug'
 
   def initialize(size = 9, bombs = 10)
     @size   = size
     @board  = Array.new(size) { Array.new(size) }
-    @revealed_pos = []
+    #@revealed_pos = []
     @bombs  = bombs
     board_populate
-    board_state
+    # board_state
   end
 
-  def revealed_board
-  end
-
-  def board_state
+  def board_render
+    system 'clear'
     (0...@size).to_a.each do |x|
+      line = ""
       (0...@size).to_a.each do |y|
         pos = [x,y]
-        self[pos] = bomb_adjacency(pos) unless self[pos] == :B
+        bombs_adjacent = bomb_adjacency(pos)
+
+        unless self[pos].revealed
+          line << "*"
+        elsif self[pos].bomb
+          line << "B"
+        elsif bombs_adjacent == 0
+          line << "_"
+        else
+          line << bombs_adjacent.to_s
+        end
+
+        line << "|" unless y == @size - 1
       end
+      print line
+      puts "\n"
     end
   end
+
+  def reveal_tiles(pos)
+    return  if bomb_adjacency(pos) != 0 || self[pos].revealed
+    self[pos].reveal
+
+    bordering_tiles(pos).each do |tile|
+      reveal_tiles(tile)
+    end
+  end
+
+  private
+
+  # def board_state
+  #   (0...@size).to_a.each do |x|
+  #     (0...@size).to_a.each do |y|
+  #       pos = [x,y]
+  #       self[pos] = bomb_adjacency(pos) unless self[pos].bomb
+  #     end
+  #   end
+  # end
 
   def bomb_adjacency(pos)
     number_of_bombs_adjacent = 0
 
     bordering_tiles(pos).each do |tile|
-      number_of_bombs_adjacent += 1 if self[tile] == :B
+      number_of_bombs_adjacent += 1 if self[tile].bomb
     end
 
     number_of_bombs_adjacent
@@ -52,19 +87,40 @@ class Board
     potential_bordering_tiles
   end
 
-  private
-  def board_populate
-    bombs_placed = 0
 
-    until bombs_placed == @bombs
-      #debugger
-      random_position = [rand(@size), rand(@size)]
-      if self[random_position].nil?
-        self[random_position] = :B
-      else
-        redo
+  # def board_populate
+  #   bombs_placed = 0
+  #
+  #   until bombs_placed == @bombs
+  #     #debugger
+  #     random_position = [rand(@size), rand(@size)]
+  #     if self[random_position].nil?
+  #       self[random_position] = :B
+  #     else
+  #       redo
+  #     end
+  #     bombs_placed += 1
+  #   end
+  # end
+
+  def board_populate
+    tiles = []
+
+    @bombs.times do |bomb|
+      tiles << Tile.new(true)
+    end
+
+    ((@size * @size) - @bombs).times do |tile|
+      tiles << Tile.new
+    end
+
+    tiles.shuffle
+
+    (0...@size).to_a.each do |x|
+      (0...@size).to_a.each do |y|
+        pos = [x, y]
+        @board[pos] = tiles.pop
       end
-      bombs_placed += 1
     end
   end
 
