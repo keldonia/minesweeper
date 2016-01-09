@@ -1,12 +1,12 @@
 class Board
-  require 'tile.rb'
+  require_relative 'tile.rb'
 
-  attr_reader :board
+  attr_reader :grid
   require 'byebug'
 
   def initialize(size = 9, bombs = 10)
     @size   = size
-    @board  = Array.new(size) { Array.new(size) }
+    @grid  = Array.new(size) { Array.new(size) }
     #@revealed_pos = []
     @bombs  = bombs
     board_populate
@@ -21,7 +21,7 @@ class Board
         pos = [x,y]
         bombs_adjacent = bomb_adjacency(pos)
 
-        unless self[pos].revealed
+        if self[pos].revealed == false
           line << "*"
         elsif self[pos].bomb
           line << "B"
@@ -39,8 +39,9 @@ class Board
   end
 
   def reveal_tiles(pos)
-    return  if bomb_adjacency(pos) != 0 || self[pos].revealed
+    return  if self[pos].revealed
     self[pos].reveal
+    return  if bomb_adjacency(pos) != 0
 
     bordering_tiles(pos).each do |tile|
       reveal_tiles(tile)
@@ -114,23 +115,23 @@ class Board
       tiles << Tile.new
     end
 
-    tiles.shuffle
+    tiles.shuffle!
 
     (0...@size).to_a.each do |x|
       (0...@size).to_a.each do |y|
         pos = [x, y]
-        @board[pos] = tiles.pop
+        self[pos] = tiles.pop
       end
     end
   end
 
   def [](pos)
     x, y = pos
-    @board[x][y]
+    @grid[x][y]
   end
 
   def []=(pos, value)
     x, y = pos
-    @board[x][y] = value
+    @grid[x][y] = value
   end
 end

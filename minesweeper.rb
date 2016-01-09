@@ -1,5 +1,6 @@
+require_relative "board.rb"
+require "byebug"
+
 class Minesweeper
-  require "board.rb"
-  require "byebug"
 
 end
