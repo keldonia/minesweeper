@@ -44,6 +44,7 @@ class Board
     return  if self[pos].revealed
     self[pos].reveal
     return  if bomb_adjacency(pos) != 0
+    return :B if self[pos].bomb
 
     bordering_tiles(pos).each do |tile|
       reveal_tiles(tile)
