@@ -4,7 +4,7 @@ class Board
   attr_reader :grid
   require 'byebug'
 
-  def initialize(size = 9, bombs = 10)
+  def initialize(size, bombs)
     @size   = size
     @grid  = Array.new(size) { Array.new(size) }
     #@revealed_pos = []
@@ -27,6 +27,8 @@ class Board
           line << "B"
         elsif bombs_adjacent == 0
           line << "_"
+        elsif self[pos].flagged
+          line << "F"
         else
           line << bombs_adjacent.to_s
         end
